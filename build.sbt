@@ -10,9 +10,9 @@ lazy val commonSettings = ReleasePlugin.extraReleaseCommands ++ Seq(
   releaseCrossBuild := true,
   organization := "com.github.choppythelumberjack",
   scalaVersion := "2.11.12",
-  crossScalaVersions := Seq("2.11.12","2.12.4"),
+  crossScalaVersions := Seq("2.11.12","2.12.12","2.13.3"),
   libraryDependencies ++= Seq(
-    "org.scalatest"   %% "scalatest"     % "3.0.4"     % Test,
+    "org.scalatest"   %% "scalatest"     % "3.2.2"     % Test,
     "com.h2database"  % "h2"             % "1.4.196"   % Test
   ),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
@@ -41,6 +41,15 @@ lazy val commonSettings = ReleasePlugin.extraReleaseCommands ++ Seq(
           pushChanges
         )
       case Some((2, 12)) =>
+        Seq[ReleaseStep](
+          checkSnapshotDependencies,
+          inquireVersions,
+          runClean,
+          setReleaseVersion,
+          publishArtifacts,
+          releaseStepCommand("sonatypeReleaseAll")
+        )
+      case Some((2, 13)) =>
         Seq[ReleaseStep](
           checkSnapshotDependencies,
           inquireVersions,

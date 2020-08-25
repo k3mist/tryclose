@@ -2,9 +2,10 @@ package com.github.choppythelumberjack.tryclose.examples
 
 import com.github.choppythelumberjack.tryclose.FailureEqualityComparison
 import org.h2.jdbcx.JdbcDataSource
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.freespec.AnyFreeSpecLike
 
-class TestTryCloseExamples extends FreeSpec with Matchers with FailureEqualityComparison {
+class TestTryCloseExamples extends AnyFreeSpecLike with Matchers with FailureEqualityComparison {
 
   def makeDatasource = {
     val datasoure = new JdbcDataSource()

@@ -35,7 +35,7 @@ trait ImplicitCloseHelper {
 }
 
 abstract class TryClose[+T](implicit evidence:CanClose[T]) extends ImplicitCloseHelper {
-  def handler:CloseHandler = tc=>Unit
+  def handler:CloseHandler = tc=>()
   def resolve:TryCloseResult[T] = {
     retrieve(new IdentityContinuation[T])
   }
@@ -61,7 +61,7 @@ abstract class TryClose[+T](implicit evidence:CanClose[T]) extends ImplicitClose
   }
 
   def map[U](f: T => U)(implicit evidence:CanClose[U]): TryClose[U] = mapWithHandler(f)(evidence)
-  def mapWithHandler[U](f: T => U, closeHandler: CloseHandler = (tc=>Unit))(implicit evidence:CanClose[U]): TryClose[U] = {
+  def mapWithHandler[U](f: T => U, closeHandler: CloseHandler = (tc=>()))(implicit evidence:CanClose[U]): TryClose[U] = {
     val parent = this
     new TryClose[U] {
       override def retrieve[V](continuation: Continuation[U, V]): TryCloseResult[V] = {
@@ -99,7 +99,7 @@ abstract class TryClose[+T](implicit evidence:CanClose[T]) extends ImplicitClose
     * Applies the given function `f` if this fails when `resolve` happens. This is like `map` for the exception.
     * Additionally, it allows the user to pass a handler to be called if the closing throws and exception.
     */
-  def recoverWithHandler[U >: T](rescueException: PartialFunction[Throwable, U], closeHandler: CloseHandler = (tc=>Unit))(implicit evidence: CanClose[U]): TryClose[U] =
+  def recoverWithHandler[U >: T](rescueException: PartialFunction[Throwable, U], closeHandler: CloseHandler = (tc=>()))(implicit evidence: CanClose[U]): TryClose[U] =
     recoverWith(rescueException.andThen(u => TryClose(u, closeHandler)))(evidence)
 
   /**
@@ -168,7 +168,7 @@ object TryClose {
 
   private[tryclose] def liftCloseable[T](
     value: () => T,
-    closeHandler: CloseHandler = (tc=>{println(s"Unit Close Handler ${tc}"); Unit}))(implicit evidence:CanClose[T]
+    closeHandler: CloseHandler = (tc=>{println(s"Unit Close Handler ${tc}"); ()}))(implicit evidence:CanClose[T]
   ) =
     new TryClose[T] {
       override def retrieve[U](continuation:Continuation[T, U]): TryCloseResult[U] = {
@@ -188,12 +188,12 @@ object TryClose {
       override def handler: CloseHandler = closeHandler
     }
 
-  def apply[T](value: => T, closeHandler: CloseHandler = (tc=>Unit))(implicit evidence:CanClose[T]) =
+  def apply[T](value: => T, closeHandler: CloseHandler = (tc=>()))(implicit evidence:CanClose[T]) =
     TryClose.liftCloseable(() => value, closeHandler)(evidence)
 
-  def wrap[T](value: => T, closeHandler: CloseHandler = (tc=>Unit)) =
+  def wrap[T](value: => T, closeHandler: CloseHandler = (tc=>())) =
     TryClose.liftCloseable(() => Wrapper[T](value), closeHandler)
 
-  def wrapWithCloser[T](value: => T, closeHandler: CloseHandler = (tc=>Unit))(closer:T=>Unit) =
+  def wrapWithCloser[T](value: => T, closeHandler: CloseHandler = (tc=>()))(closer:T=>Unit) =
     TryClose.liftCloseable(() => LambdaWrapper[T](value, closer), closeHandler)
 }

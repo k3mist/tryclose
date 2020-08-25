@@ -4,7 +4,7 @@ trait ImplicitCloseables {
 
   implicit def wrapperCloseable[T]: CanClose[Wrapper[T]] =
     new CanClose[Wrapper[T]] {
-      override def close(closeable: Wrapper[T]): Unit = Unit
+      override def close(closeable: Wrapper[T]): Unit = ()
     }
 
   implicit def lambdaWrapperCloseable[T]: CanClose[LambdaWrapper[T]] =
@@ -13,15 +13,15 @@ trait ImplicitCloseables {
     }
 
   implicit class CloseableThrowableEvidence[T <: Throwable](t: T) extends CanClose[T] {
-    override def close(t: T): Unit = Unit
+    override def close(t: T): Unit = ()
   }
 
   implicit object CloseableTryCloseEvidence extends CanClose[TryClose[Any]] {
-    override def close(t: TryClose[Any]): Unit = Unit
+    override def close(t: TryClose[Any]): Unit = ()
   }
 
   implicit object CloseableUnitEvidence extends CanClose[Unit] {
-    override def close(t: Unit): Unit = Unit
+    override def close(t: Unit): Unit = ()
   }
 
   object JavaImplicits {

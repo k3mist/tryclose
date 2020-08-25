@@ -3,11 +3,13 @@ package com.github.choppythelumberjack.tryclose
 import java.io.{Closeable, IOException}
 
 import com.github.choppythelumberjack.tryclose.TryClose.CloseHandler
-import org.scalatest.{BeforeAndAfterEach, FreeSpec, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.freespec.AnyFreeSpecLike
 
 import scala.collection.mutable
 
-class TryCloseMonadSpec extends FreeSpec with Matchers with BeforeAndAfterEach with FailureEqualityComparison {
+class TryCloseMonadSpec extends AnyFreeSpecLike with Matchers with BeforeAndAfterEach with FailureEqualityComparison {
 
   sealed trait Marker
   case class Open(str:String) extends Marker
@@ -53,7 +55,7 @@ class TryCloseMonadSpec extends FreeSpec with Matchers with BeforeAndAfterEach w
   }
 
   def closeHandler(label:String)(implicit lineageRecorder:LineageRecorder):CloseHandler =
-    tc => {lineageRecorder.lineage += CloseException(label); Unit}
+    tc => {lineageRecorder.lineage += CloseException(label); ()}
 
   def fakeLinageRecorder = new LineageRecorder(new mutable.ArrayBuffer[Marker]())
 
